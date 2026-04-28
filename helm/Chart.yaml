@@ -1,0 +1,6 @@
+apiVersion: v2
+name: tyk-sre-assignment
+description: SRE tool for Kubernetes cluster health and network policy management
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

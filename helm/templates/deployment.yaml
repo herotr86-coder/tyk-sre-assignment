@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tyk-sre-assignment.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tyk-sre-assignment.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "tyk-sre-assignment.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "tyk-sre-assignment.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "tyk-sre-assignment.fullname" . }}
+      containers:
+        - name: tyk-sre-assignment
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "--address=:8080"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
